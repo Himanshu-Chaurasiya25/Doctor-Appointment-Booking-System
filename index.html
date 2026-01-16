@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Doctor Search & Discovery | HealthSync</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#2c879b", "background-light": "#f6f7f8", "background-dark": "#212936" },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Manrope', sans-serif; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .fade-in-section { animation: fadeIn 0.5s ease-out; }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-[#121617] dark:text-white antialiased relative">
+
+<header class="sticky top-0 z-50 bg-white dark:bg-background-dark border-b border-[#dde3e4] dark:border-gray-700 px-6 lg:px-20 py-4 shadow-sm">
+    <div class="max-w-[1400px] mx-auto flex items-center justify-between">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="switchToHome()">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block">health_metrics</span>
+            </div>
+            <h2 class="text-xl font-extrabold tracking-tight text-primary">HealthSync</h2>
+        </div>
+        <nav class="hidden md:flex items-center gap-10">
+    <a class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="index.html">Home</a>
+    
+    <a class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="appointments.html?tab=pending">Appointments Pending</a>
+    
+    <a class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="appointments.html?tab=history">History</a>
+</nav>
+        <div class="flex items-center gap-4">
+            <button class="bg-primary text-white px-6 py-2.5 rounded-lg text-sm font-bold shadow-md hover:bg-opacity-90 transition-all">Join Now</button>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-[1400px] mx-auto px-6 lg:px-20 py-8">
+    
+    <div id="heroSection" class="mb-12 fade-in-section">
+        <div class="relative overflow-hidden rounded-2xl bg-primary/5 dark:bg-primary/10 p-8 lg:p-12 border border-primary/10">
+            <div class="relative z-10 max-w-3xl">
+                <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight mb-4 text-[#121617] dark:text-white leading-tight">
+                    Expert care is just <span class="text-primary">one click away.</span>
+                </h1>
+                <p class="text-lg text-[#687d82] dark:text-gray-400 mb-8 max-w-xl">
+                    Search by specialty, location, or provider name to schedule your next visit.
+                </p>
+                <div class="flex flex-col md:flex-row gap-2 bg-white dark:bg-gray-800 p-2 rounded-xl shadow-xl border border-[#dde3e4] dark:border-gray-600">
+                    <div class="flex-1 flex items-center px-4 border-b md:border-b-0 md:border-r border-[#dde3e4] dark:border-gray-600">
+                        <span class="material-symbols-outlined text-[#687d82] mr-2">search</span>
+                        <input id="searchInput" class="w-full border-none focus:ring-0 bg-transparent text-sm py-3 placeholder:text-[#687d82] text-black dark:text-white" placeholder="Specialty, Doctor name..." type="text"/>
+                    </div>
+                    <button onclick="filterDoctors()" class="bg-primary text-white px-8 py-3 rounded-lg font-bold flex items-center justify-center gap-2 hover:brightness-110 transition-all">
+                        Search
+                    </button>
+                </div>
+            </div>
+            <div class="absolute right-0 top-0 h-full w-1/3 opacity-10 pointer-events-none hidden lg:block">
+                <span class="material-symbols-outlined text-[300px] text-primary absolute -right-12 -top-12">medical_services</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="listHeaderSection" class="mb-8 hidden fade-in-section">
+        <h1 class="text-3xl font-extrabold mb-2">Complete Specialist Directory</h1>
+        <p class="text-[#687d82]">Browse our complete list of verified specialists.</p>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        
+        <aside class="w-full lg:w-64 flex-shrink-0">
+            <div class="bg-white dark:bg-gray-800 rounded-xl border border-[#dde3e4] dark:border-gray-700 p-6 sticky top-28">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="font-bold text-lg flex items-center gap-2"><span class="material-symbols-outlined text-sm">tune</span> Filters</h3>
+                    <button onclick="resetFilters()" class="text-primary text-xs font-bold hover:underline">Reset</button>
+                </div>
+                <div class="space-y-6">
+                    <div>
+                        <p class="text-sm font-bold mb-3 uppercase tracking-wider text-[#687d82]">Doctor Gender</p>
+                        <div class="flex flex-wrap gap-2" id="genderFilters">
+                            <button onclick="setGenderFilter('all')" class="gender-btn px-3 py-1.5 border border-primary bg-primary/10 text-primary text-xs font-bold rounded-full transition-colors" id="btn-all">Any</button>
+                            <button onclick="setGenderFilter('male')" class="gender-btn px-3 py-1.5 border border-[#dde3e4] dark:border-gray-600 text-xs font-bold rounded-full hover:border-primary transition-colors" id="btn-male">Male</button>
+                            <button onclick="setGenderFilter('female')" class="gender-btn px-3 py-1.5 border border-[#dde3e4] dark:border-gray-600 text-xs font-bold rounded-full hover:border-primary transition-colors" id="btn-female">Female</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <section class="flex-1">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold" id="resultsTitle">Top Recommended Doctors</h2>
+                    <p class="text-[#687d82] text-sm" id="resultsSubtitle">Showing results based on your preferences</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm text-[#687d82]">Sort by:</span>
+                    <select id="sortSelect" onchange="sortDoctors()" class="border-none bg-transparent text-sm font-bold focus:ring-0 cursor-pointer text-primary">
+                        <option value="rating">Highest Rated</option>
+                        <option value="distance">Distance</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="doctorContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 fade-in-section">
+                </div>
+
+            <div class="mt-12 flex flex-col items-center gap-4" id="loadMoreContainer">
+                <button onclick="loadMore()" class="px-8 py-3 border border-[#dde3e4] dark:border-gray-600 rounded-lg text-sm font-bold hover:bg-white dark:hover:bg-gray-700 transition-all">
+                    Load More Results
+                </button>
+            </div>
+        </section>
+    </div>
+</main>
+
+<script>
+    // 1. DATA (MUST MATCH PROFILE.HTML EXACTLY)
+    const doctorsData = [
+        { id: 1, name: "Dr. Sarah Chen", specialty: "Cardiologist", rating: 4.9, location: "San Francisco, CA", distance: 1.2, image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300&h=300", gender: "female", nextSlot: "Today, 2:30 PM", color: "text-green-600", desc: "Expert in interventional cardiology with 15 years experience." },
+        { id: 2, name: "Dr. Michael Roberts", specialty: "Dermatologist", rating: 4.8, location: "Palo Alto, CA", distance: 4.5, image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300", gender: "male", nextSlot: "Tomorrow, 10:00 AM", color: "text-gray-800", desc: "Specializes in cosmetic and medical dermatology treatments." },
+        { id: 3, name: "Dr. Elena Rodriguez", specialty: "Pediatrician", rating: 5.0, location: "Berkeley, CA", distance: 6.8, image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=300&h=300", gender: "female", nextSlot: "Today, 4:15 PM", color: "text-green-600", desc: "Compassionate care for infants, children, and adolescents." },
+        { id: 4, name: "Dr. Sophia Patel", specialty: "Neurologist", rating: 4.9, location: "San Mateo, CA", distance: 2.1, image: "https://images.unsplash.com/photo-1614608682850-e0d6ed316d47?auto=format&fit=crop&q=80&w=300&h=300", gender: "female", nextSlot: "Mon, Sep 12", color: "text-gray-800", desc: "Focuses on migraine management and neurodegenerative disorders." },
+        { id: 5, name: "Dr. David Kim", specialty: "Orthopedic Surgeon", rating: 4.7, location: "San Francisco, CA", distance: 0.8, image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300", gender: "male", nextSlot: "Available Now", color: "text-green-600", desc: "Specializes in sports medicine and joint replacement surgery." },
+        { id: 6, name: "Dr. James Wilson", specialty: "General Surgeon", rating: 4.6, location: "Oakland, CA", distance: 3.4, image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300&h=300", gender: "male", nextSlot: "Tue, Sep 13", color: "text-gray-800", desc: "Board-certified surgeon with expertise in minimally invasive procedures." },
+        { id: 7, name: "Dr. Emily White", specialty: "Dentist", rating: 4.8, location: "Daly City, CA", distance: 5.0, image: "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&q=80&w=300&h=300", gender: "female", nextSlot: "Wed, Sep 14", color: "text-gray-800", desc: "Providing comprehensive dental care and cosmetic dentistry." },
+        { id: 8, name: "Dr. Alan Grant", specialty: "Endocrinologist", rating: 4.5, location: "San Francisco, CA", distance: 2.2, image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=300&h=300", gender: "male", nextSlot: "Fri, Sep 16", color: "text-gray-800", desc: "Expert in diabetes management and hormonal imbalances." },
+        { id: 9, name: "Dr. Linda Lee", specialty: "Optometrist", rating: 4.9, location: "San Jose, CA", distance: 8.2, image: "https://images.unsplash.com/photo-1651008325506-e772bd4359d9?auto=format&fit=crop&q=80&w=300&h=300", gender: "female", nextSlot: "Available Now", color: "text-green-600", desc: "Comprehensive eye exams and vision therapy." },
+        { id: 10, name: "Dr. Robert Stark", specialty: "Cardiologist", rating: 4.7, location: "Fremont, CA", distance: 12.0, image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300", gender: "male", nextSlot: "Mon, Sep 19", color: "text-gray-800", desc: "Specializing in heart failure and heart transplantation." },
+        { id: 11, name: "Dr. Amanda Waller", specialty: "Psychiatrist", rating: 4.6, location: "Berkeley, CA", distance: 7.0, image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300&h=300", gender: "female", nextSlot: "Tomorrow", color: "text-gray-800", desc: "Mental health specialist focusing on anxiety and depression." },
+        { id: 12, name: "Dr. Strange", specialty: "Neurosurgeon", rating: 5.0, location: "New York, NY", distance: 2000, image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300", gender: "male", nextSlot: "Unknown", color: "text-red-500", desc: "World renowned neurosurgeon." },
+        { id: 13, name: "Dr. Banner", specialty: "Radiologist", rating: 4.9, location: "Dayton, OH", distance: 500, image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300&h=300", gender: "male", nextSlot: "Available", color: "text-green-600", desc: "Expert in Gamma radiation imaging." },
+        { id: 14, name: "Dr. Quinn", specialty: "General Practitioner", rating: 4.4, location: "Colorado Springs", distance: 800, image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=300&h=300", gender: "female", nextSlot: "Today", color: "text-green-600", desc: "Family medicine and rural health specialist." },
+        { id: 15, name: "Dr. House", specialty: "Diagnostician", rating: 3.5, location: "Princeton, NJ", distance: 3000, image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300", gender: "male", nextSlot: "Rarely", color: "text-red-600", desc: "Specializes in infectious diseases and nephrology." }
+    ];
+
+    let viewMode = 'grid';
+    let currentGender = 'all';
+    let visibleCount = 6;
+    let filteredDoctors = [...doctorsData];
+
+    function switchToHome() {
+        viewMode = 'grid';
+        visibleCount = 6;
+        document.getElementById('heroSection').classList.remove('hidden');
+        document.getElementById('listHeaderSection').classList.add('hidden');
+        document.getElementById('resultsTitle').innerText = "Top Recommended Doctors";
+        document.getElementById('doctorContainer').className = "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 fade-in-section";
+        filterDoctors();
+    }
+
+    function switchToSpecialties() {
+        viewMode = 'list';
+        visibleCount = doctorsData.length;
+        document.getElementById('heroSection').classList.add('hidden');
+        document.getElementById('listHeaderSection').classList.remove('hidden');
+        document.getElementById('resultsTitle').innerText = "All Specialists";
+        document.getElementById('doctorContainer').className = "flex flex-col gap-4 fade-in-section";
+        filterDoctors();
+    }
+
+    function renderDoctors() {
+        const grid = document.getElementById('doctorContainer');
+        grid.innerHTML = ""; 
+        const toShow = filteredDoctors.slice(0, visibleCount);
+
+        if(toShow.length === 0) {
+            grid.innerHTML = `<div class="p-10 text-center text-gray-500 w-full">No doctors found.</div>`;
+            return;
+        }
+
+        toShow.forEach(doc => {
+            let cardHtml = '';
+            // IMPORTANT: href links to profile.html?id=ID
+            if (viewMode === 'grid') {
+                cardHtml = `
+                    <div class="bg-white dark:bg-gray-800 rounded-xl border border-[#dde3e4] dark:border-gray-700 overflow-hidden hover:shadow-2xl hover:border-primary/30 transition-all duration-300">
+                        <a class="group block relative overflow-hidden" href="profile.html?id=${doc.id}">
+                            <div class="relative h-48 bg-gray-100 overflow-hidden">
+                                <div class="w-full h-full bg-cover bg-center transition-transform duration-500 group-hover:scale-110" style='background-image: url("${doc.image}");'></div>
+                                <div class="absolute top-3 right-3 bg-white/90 backdrop-blur px-2 py-1 rounded-lg flex items-center gap-1 shadow-sm">
+                                    <span class="material-symbols-outlined text-yellow-500 text-sm fill-1">star</span><span class="text-xs font-bold text-[#121617]">${doc.rating}</span>
+                                </div>
+                            </div>
+                            <div class="p-5 pb-0">
+                                <h3 class="text-lg font-bold group-hover:text-primary transition-colors">${doc.name}</h3>
+                                <p class="text-primary text-sm font-semibold">${doc.specialty}</p>
+                            </div>
+                        </a>
+                        <div class="p-5 pt-1">
+                            <div class="flex items-center gap-1 text-[#687d82] text-xs mb-4">
+                                <span class="material-symbols-outlined text-xs">location_on</span><span>${doc.location}</span>
+                            </div>
+                            <div class="flex items-center justify-between pt-4 border-t border-[#f1f3f4] dark:border-gray-700">
+                                <div class="flex flex-col">
+                                    <span class="text-[10px] uppercase font-bold text-[#687d82]">Next Slot</span><span class="text-xs font-bold ${doc.color}">${doc.nextSlot}</span>
+                                </div>
+                                <a href="profile.html?id=${doc.id}" class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:brightness-110 shadow-sm transition-all">Book</a>
+                            </div>
+                        </div>
+                    </div>`;
+            } else {
+                cardHtml = `
+                    <div class="flex flex-col md:flex-row bg-white dark:bg-gray-800 rounded-xl border border-[#dde3e4] dark:border-gray-700 overflow-hidden hover:shadow-lg transition-all p-4 gap-4 items-center">
+                        <a href="profile.html?id=${doc.id}" class="w-full md:w-24 h-24 flex-shrink-0 cursor-pointer">
+                             <div class="w-full h-full rounded-full md:rounded-lg bg-cover bg-center" style='background-image: url("${doc.image}");'></div>
+                        </a>
+                        <div class="flex-1 text-center md:text-left">
+                            <h3 class="text-xl font-bold text-[#121617] dark:text-white"><a href="profile.html?id=${doc.id}" class="hover:text-primary">${doc.name}</a></h3>
+                            <p class="text-primary font-semibold text-sm">${doc.specialty}</p>
+                            <p class="text-gray-500 text-sm mt-1 line-clamp-1">${doc.desc}</p>
+                        </div>
+                        <div class="w-full md:w-auto flex flex-col gap-2">
+                             <a href="profile.html?id=${doc.id}" class="bg-primary text-white px-6 py-3 rounded-lg text-center text-sm font-bold hover:brightness-110 shadow-sm transition-all w-full md:w-auto">Book Appointment</a>
+                        </div>
+                    </div>`;
+            }
+            grid.innerHTML += cardHtml;
+        });
+
+        const loadBtn = document.getElementById('loadMoreContainer');
+        loadBtn.style.display = (visibleCount >= filteredDoctors.length) ? 'none' : 'flex';
+    }
+
+    document.getElementById('searchInput').addEventListener('keyup', (e) => filterDoctors(e.target.value.toLowerCase()));
+    
+    function setGenderFilter(gender) {
+        currentGender = gender;
+        document.querySelectorAll('.gender-btn').forEach(btn => btn.className = "gender-btn px-3 py-1.5 border border-[#dde3e4] dark:border-gray-600 text-xs font-bold rounded-full hover:border-primary transition-colors cursor-pointer");
+        document.getElementById(`btn-${gender}`).className = "gender-btn px-3 py-1.5 border border-primary bg-primary/10 text-primary text-xs font-bold rounded-full transition-colors cursor-pointer";
+        filterDoctors(document.getElementById('searchInput').value.toLowerCase());
+    }
+
+    function filterDoctors(searchTerm = "") {
+        filteredDoctors = doctorsData.filter(doc => (doc.name.toLowerCase().includes(searchTerm) || doc.specialty.toLowerCase().includes(searchTerm)) && (currentGender === 'all' || doc.gender === currentGender));
+        renderDoctors();
+    }
+
+    function resetFilters() {
+        document.getElementById('searchInput').value = "";
+        setGenderFilter('all');
+    }
+
+    function sortDoctors() {
+        const criteria = document.getElementById('sortSelect').value;
+        if(criteria === 'rating') filteredDoctors.sort((a,b) => b.rating - a.rating);
+        else if (criteria === 'distance') filteredDoctors.sort((a,b) => a.distance - b.distance);
+        renderDoctors();
+    }
+
+    function loadMore() { visibleCount += 3; renderDoctors(); }
+    
+    switchToHome(); 
+</script>
+</body>
+</html>
