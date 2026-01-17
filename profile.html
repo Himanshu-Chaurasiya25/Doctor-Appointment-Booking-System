@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Doctor Profile | HealthSync</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: { "primary": "#2c879b", "background-light": "#f6f7f8", "background-dark": "#212936" },
+                    fontFamily: { "display": ["Manrope", "sans-serif"] },
+                },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Manrope', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-[#121617] dark:text-white antialiased">
+
+<header class="sticky top-0 z-50 bg-white dark:bg-background-dark border-b border-[#dde3e4] dark:border-gray-700 px-6 lg:px-20 py-4 shadow-sm">
+    <div class="max-w-[1400px] mx-auto flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-3 cursor-pointer">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block">arrow_back</span>
+            </div>
+            <h2 class="text-xl font-extrabold tracking-tight text-primary">Back to Search</h2>
+        </a>
+        <nav class="hidden md:flex items-center gap-10">
+            <a class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="index.html">Home</a>
+            <a class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="appointments.html?tab=pending">Appointments Pending</a>
+            <a class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="appointments.html?tab=history">History</a>
+        </nav>
+    </div>
+</header>
+
+<main class="max-w-[1200px] mx-auto px-6 lg:px-20 py-8">
+    <div id="errorState" class="hidden text-center py-20">
+        <h2 class="text-2xl font-bold text-red-500">Doctor Not Found</h2>
+        <a href="index.html" class="text-primary underline mt-4 block">Return to Home</a>
+    </div>
+
+    <div id="profileContent" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-[#dde3e4] dark:border-gray-700 shadow-sm flex flex-col sm:flex-row gap-6 items-start">
+                <div class="w-32 h-32 rounded-xl bg-gray-200 bg-cover bg-center shrink-0" id="docImage"></div>
+                <div class="flex-1">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-2 inline-block" id="docSpecialty">Specialty</span>
+                            <h1 class="text-3xl font-extrabold mb-1" id="docName">Doctor Name</h1>
+                            <p class="text-[#687d82] text-sm mb-3" id="docLocation">Location</p>
+                        </div>
+                        <div class="flex items-center gap-1 bg-yellow-50 px-3 py-1 rounded-lg border border-yellow-100">
+                            <span class="material-symbols-outlined text-yellow-500 text-sm">star</span>
+                            <span class="font-bold text-yellow-700" id="docRating">0.0</span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed mb-4" id="docDesc">Description...</p>
+                    <div class="flex gap-4 border-t border-gray-100 pt-4">
+                        <div class="text-center px-4 border-r border-gray-100">
+                            <p class="font-bold text-lg">15+</p>
+                            <p class="text-xs text-gray-500">Years Exp.</p>
+                        </div>
+                        <div class="text-center px-4 border-r border-gray-100">
+                            <p class="font-bold text-lg">2k+</p>
+                            <p class="text-xs text-gray-500">Patients</p>
+                        </div>
+                        <div class="text-center px-4">
+                            <p class="font-bold text-lg">98%</p>
+                            <p class="text-xs text-gray-500">Success</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-gray-800 rounded-2xl p-6 border border-[#dde3e4] dark:border-gray-700 shadow-sm">
+                <h3 class="text-xl font-bold mb-4">About the Doctor</h3>
+                <p class="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Dr. <span id="aboutName"></span> is a highly skilled specialist dedicated to providing top-tier medical care. 
+                    They graduated from top medical institutions and have received multiple awards for their contribution to the field. 
+                    Patients appreciate their attentive listening skills and thorough diagnostic approach.
+                </p>
+            </div>
+
+            <div>
+                <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                    Patient Reviews <span class="text-sm font-normal text-gray-500">(124 verified)</span>
+                </h3>
+                <div class="space-y-4" id="reviewsContainer"></div>
+            </div>
+        </div>
+
+        <div class="lg:col-span-1">
+            <div class="sticky top-28 bg-white dark:bg-gray-800 rounded-2xl border border-[#dde3e4] dark:border-gray-700 shadow-xl overflow-hidden">
+                <div class="bg-primary/5 p-4 border-b border-primary/10">
+                    <h3 class="font-bold text-lg text-primary flex items-center gap-2">
+                        <span class="material-symbols-outlined">calendar_month</span> Book Appointment
+                    </h3>
+                </div>
+
+                <div class="p-6">
+                    <div class="mb-6">
+                        <label class="text-xs font-bold uppercase text-gray-500 mb-3 block">Select Date</label>
+                        <div class="flex gap-2 overflow-x-auto no-scrollbar pb-2" id="dateContainer"></div>
+                    </div>
+
+                    <div class="mb-8">
+                        <label class="text-xs font-bold uppercase text-gray-500 mb-3 block">Select Time <span class="text-red-500">*</span></label>
+                        <div class="grid grid-cols-3 gap-2" id="timeContainer">
+                            <button class="time-slot py-2 border rounded-lg text-sm hover:border-primary hover:text-primary transition-all">09:00 AM</button>
+                            <button class="time-slot py-2 border rounded-lg text-sm hover:border-primary hover:text-primary transition-all">09:30 AM</button>
+                            <button class="time-slot py-2 border rounded-lg text-sm hover:border-primary hover:text-primary transition-all">10:00 AM</button>
+                            <button class="time-slot py-2 border rounded-lg text-sm hover:border-primary hover:text-primary transition-all">10:30 AM</button>
+                            <button class="time-slot py-2 border rounded-lg text-sm hover:border-primary hover:text-primary transition-all">11:00 AM</button>
+                            <button class="time-slot py-2 border rounded-lg text-sm hover:border-primary hover:text-primary transition-all">11:30 AM</button>
+                        </div>
+                    </div>
+
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl mb-4 text-sm">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-500">Consultation Fee</span>
+                            <span class="font-bold">₹1500.00</span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-500">Booking Fee</span>
+                            <span class="font-bold">₹100.00</span>
+                        </div>
+                        <div class="border-t border-gray-200 dark:border-gray-600 my-2 pt-2 flex justify-between text-lg font-extrabold text-primary">
+                            <span>Total</span>
+                            <span>₹1600.00</span>
+                        </div>
+                    </div>
+
+                    <button onclick="confirmBooking()" class="w-full bg-primary text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:brightness-110 hover:shadow-xl transition-all flex items-center justify-center gap-2">
+                        Confirm Booking
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    const doctorsData = [
+        { id: 1, name: "Dr. Sarah Chen", specialty: "Cardiologist", rating: 4.9, location: "San Francisco, CA", image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300&h=300", desc: "Expert in interventional cardiology with 15 years experience." },
+        { id: 2, name: "Dr. Michael Roberts", specialty: "Dermatologist", rating: 4.8, location: "Palo Alto, CA", image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300", desc: "Specializes in cosmetic and medical dermatology treatments." },
+        { id: 3, name: "Dr. Elena Rodriguez", specialty: "Pediatrician", rating: 5.0, location: "Berkeley, CA", image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=300&h=300", desc: "Compassionate care for infants, children, and adolescents." },
+        { id: 4, name: "Dr. Sophia Patel", specialty: "Neurologist", rating: 4.9, location: "San Mateo, CA", image: "https://images.unsplash.com/photo-1614608682850-e0d6ed316d47?auto=format&fit=crop&q=80&w=300&h=300", desc: "Focuses on migraine management and neurodegenerative disorders." },
+        { id: 5, name: "Dr. David Kim", specialty: "Orthopedic Surgeon", rating: 4.7, location: "San Francisco, CA", image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300", desc: "Specializes in sports medicine and joint replacement surgery." },
+        { id: 6, name: "Dr. James Wilson", specialty: "General Surgeon", rating: 4.6, location: "Oakland, CA", image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300&h=300", desc: "Board-certified surgeon with expertise in minimally invasive procedures." },
+        { id: 7, name: "Dr. Emily White", specialty: "Dentist", rating: 4.8, location: "Daly City, CA", image: "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&q=80&w=300&h=300", desc: "Providing comprehensive dental care and cosmetic dentistry." },
+        { id: 8, name: "Dr. Alan Grant", specialty: "Endocrinologist", rating: 4.5, location: "San Francisco, CA", image: "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&q=80&w=300&h=300", desc: "Expert in diabetes management and hormonal imbalances." },
+        { id: 9, name: "Dr. Linda Lee", specialty: "Optometrist", rating: 4.9, location: "San Jose, CA", image: "https://images.unsplash.com/photo-1651008325506-e772bd4359d9?auto=format&fit=crop&q=80&w=300&h=300", desc: "Comprehensive eye exams and vision therapy." },
+        { id: 10, name: "Dr. Robert Stark", specialty: "Cardiologist", rating: 4.7, location: "Fremont, CA", image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300", desc: "Specializing in heart failure and heart transplantation." },
+        { id: 11, name: "Dr. Amanda Waller", specialty: "Psychiatrist", rating: 4.6, location: "Berkeley, CA", image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?auto=format&fit=crop&q=80&w=300&h=300", desc: "Mental health specialist focusing on anxiety and depression." },
+        { id: 12, name: "Dr. Strange", specialty: "Neurosurgeon", rating: 5.0, location: "New York, NY", image: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?auto=format&fit=crop&q=80&w=300&h=300", desc: "World renowned neurosurgeon." },
+        { id: 13, name: "Dr. Banner", specialty: "Radiologist", rating: 4.9, location: "Dayton, OH", image: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&q=80&w=300&h=300", desc: "Expert in Gamma radiation imaging." },
+        { id: 14, name: "Dr. Quinn", specialty: "General Practitioner", rating: 4.4, location: "Colorado Springs", image: "https://images.unsplash.com/photo-1594824476967-48c8b964273f?auto=format&fit=crop&q=80&w=300&h=300", desc: "Family medicine and rural health specialist." },
+        { id: 15, name: "Dr. House", specialty: "Diagnostician", rating: 3.5, location: "Princeton, NJ", image: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?auto=format&fit=crop&q=80&w=300&h=300", desc: "Specializes in infectious diseases and nephrology." }
+    ];
+
+    const reviewsData = [
+        { user: "Alice M.", date: "2 days ago", rating: 5, text: "Excellent experience. The doctor was very patient." },
+        { user: "John D.", date: "1 week ago", rating: 4, text: "Great clinic, but the wait time was a bit long." },
+        { user: "Sarah W.", date: "2 weeks ago", rating: 5, text: "Highly recommend! Very professional and knowledgeable." }
+    ];
+
+    let selectedDate = null;
+    let selectedTime = null;
+    let currentDoctor = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const docId = parseInt(urlParams.get('id'));
+        currentDoctor = doctorsData.find(d => d.id === docId);
+
+        if (!currentDoctor) {
+            document.getElementById('profileContent').classList.add('hidden');
+            document.getElementById('errorState').classList.remove('hidden');
+            return;
+        }
+
+        document.title = `${currentDoctor.name} | Book Appointment`;
+        document.getElementById('docImage').style.backgroundImage = `url('${currentDoctor.image}')`;
+        document.getElementById('docName').innerText = currentDoctor.name;
+        document.getElementById('docSpecialty').innerText = currentDoctor.specialty;
+        document.getElementById('docLocation').innerText = currentDoctor.location;
+        document.getElementById('docRating').innerText = currentDoctor.rating;
+        document.getElementById('docDesc').innerText = currentDoctor.desc;
+        document.getElementById('aboutName').innerText = currentDoctor.name.split(" ")[1];
+
+        renderReviews();
+        renderCalendar();
+    });
+
+    function renderReviews() {
+        const container = document.getElementById('reviewsContainer');
+        let html = '';
+        reviewsData.forEach(r => {
+            html += `
+            <div class="border-b border-gray-100 pb-4 last:border-0">
+                <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs">${r.user.charAt(0)}</div>
+                        <span class="font-bold text-sm">${r.user}</span>
+                    </div>
+                    <span class="text-xs text-gray-400">${r.date}</span>
+                </div>
+                <div class="flex text-yellow-400 text-xs mb-1">
+                    ${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}
+                </div>
+                <p class="text-gray-600 text-sm">${r.text}</p>
+            </div>`;
+        });
+        container.innerHTML = html;
+    }
+
+    function renderCalendar() {
+        const dateContainer = document.getElementById('dateContainer');
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        let today = new Date();
+        let html = '';
+
+        for(let i=0; i<14; i++) {
+            let d = new Date();
+            d.setDate(today.getDate() + i);
+            let dayName = days[d.getDay()];
+            let dateNum = d.getDate();
+            let fullDateStr = `${months[d.getMonth()]} ${dateNum}`;
+            let isSelected = i === 0;
+            if(isSelected) selectedDate = fullDateStr;
+
+            html += `
+                <div onclick="selectDate(this, '${fullDateStr}')" 
+                     class="cursor-pointer min-w-[70px] flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${isSelected ? 'border-primary bg-primary text-white shadow-lg scale-105' : 'border-gray-200 hover:border-primary bg-white'}">
+                    <span class="text-xs font-medium opacity-80">${dayName}</span>
+                    <span class="text-lg font-bold">${dateNum}</span>
+                </div>
+            `;
+        }
+        dateContainer.innerHTML = html;
+
+        document.querySelectorAll('.time-slot').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.time-slot').forEach(b => {
+                    b.classList.remove('bg-primary', 'text-white', 'border-primary');
+                    b.classList.add('border-gray-200');
+                });
+                this.classList.remove('border-gray-200');
+                this.classList.add('bg-primary', 'text-white', 'border-primary');
+                selectedTime = this.innerText;
+            });
+        });
+    }
+
+    function selectDate(el, dateStr) {
+        selectedDate = dateStr;
+        const allDates = document.getElementById('dateContainer').children;
+        for(let child of allDates) {
+            child.className = "cursor-pointer min-w-[70px] flex flex-col items-center justify-center p-3 rounded-xl border border-gray-200 hover:border-primary bg-white transition-all";
+        }
+        el.className = "cursor-pointer min-w-[70px] flex flex-col items-center justify-center p-3 rounded-xl border border-primary bg-primary text-white shadow-lg scale-105 transition-all";
+    }
+
+    // UPDATED FUNCTION: Redirects to Confirm.html
+    function confirmBooking() {
+        if(!selectedTime) {
+            alert("Please select a Time Slot from the list before confirming!");
+            return;
+        }
+        const docId = currentDoctor.id;
+        const dateParam = encodeURIComponent(selectedDate);
+        const timeParam = encodeURIComponent(selectedTime);
+        window.location.href = `Confirm.html?id=${docId}&date=${dateParam}&time=${timeParam}`;
+    }
+</script>
+
+</body>
+</html>
