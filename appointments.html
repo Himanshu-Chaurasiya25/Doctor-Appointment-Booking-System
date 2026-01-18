@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html class="light" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>My Appointments | HealthSync</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: { colors: { "primary": "#2c879b", "background-light": "#f6f7f8" }, fontFamily: { "display": ["Manrope", "sans-serif"] } },
+            },
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        body { font-family: 'Manrope', sans-serif; }
+    </style>
+</head>
+
+<body class="bg-background-light text-[#121617] antialiased">
+
+<header class="sticky top-0 z-50 bg-white border-b border-[#dde3e4] px-6 lg:px-20 py-4 shadow-sm">
+    <div class="max-w-[1400px] mx-auto flex items-center justify-between">
+        <a href="index.html" class="flex items-center gap-3 cursor-pointer">
+            <div class="bg-primary p-2 rounded-lg text-white">
+                <span class="material-symbols-outlined block">health_metrics</span>
+            </div>
+            <h2 class="text-xl font-extrabold tracking-tight text-primary">HealthSync</h2>
+        </a>
+        <nav class="hidden md:flex items-center gap-10">
+    <a class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="index.html">Home</a>
+    
+    <a id="nav-pending" class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="appointments.html?tab=pending">Appointments Pending</a>
+    
+    <a id="nav-history" class="text-sm font-semibold hover:text-primary transition-colors cursor-pointer" href="appointments.html?tab=history">History</a>
+</nav>
+        <div class="flex items-center gap-4">
+             <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold">U</div>
+        </div>
+    </div>
+</header>
+
+<main class="max-w-[1000px] mx-auto px-6 lg:px-20 py-8">
+    
+    <div class="flex items-center justify-center mb-8 bg-white p-1 rounded-xl shadow-sm border w-fit mx-auto">
+        <button onclick="manualSwitch('pending')" id="tabPending" class="px-6 py-2 rounded-lg text-sm font-bold transition-all bg-primary text-white shadow-sm">
+            Pending / Upcoming
+        </button>
+        <button onclick="manualSwitch('history')" id="tabHistory" class="px-6 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-primary">
+            History / Completed
+        </button>
+    </div>
+
+    <div id="pendingSection" class="space-y-4">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold">Upcoming Appointments</h2>
+            <span class="text-xs bg-primary/10 text-primary px-2 py-1 rounded font-bold">Active</span>
+        </div>
+        <div id="pendingContainer" class="grid gap-4"></div>
+    </div>
+
+    <div id="historySection" class="hidden space-y-4">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-bold">Past Appointments</h2>
+            <span class="text-xs bg-gray-200 text-gray-600 px-2 py-1 rounded font-bold">Archived</span>
+        </div>
+        <div id="historyContainer" class="grid gap-4 opacity-75"></div>
+    </div>
+
+    <div class="mt-12 text-center border-t border-gray-200 pt-8">
+        <button onclick="clearAllData()" class="text-red-500 text-xs font-bold border border-red-200 px-4 py-2 rounded hover:bg-red-50">
+            Reset All Data
+        </button>
+    </div>
+
+</main>
+
+<script>
+    function getAppointments() {
+        const data = localStorage.getItem('healthSyncAppointments');
+        if (!data) return [];
+        try { return JSON.parse(data); } catch (e) { return []; }
+    }
+
+    function renderAppointments() {
+        const apps = getAppointments();
+        const pendingContainer = document.getElementById('pendingContainer');
+        const historyContainer = document.getElementById('historyContainer');
+        
+        pendingContainer.innerHTML = '';
+        historyContainer.innerHTML = '';
+
+        const pendingApps = apps.filter(a => a.status === 'pending' || !a.status);
+        const historyApps = apps.filter(a => a.status === 'completed');
+
+        if (pendingApps.length === 0) {
+            pendingContainer.innerHTML = emptyState("No upcoming appointments found.");
+        } else {
+            pendingApps.forEach(app => { pendingContainer.innerHTML += createCard(app, true); });
+        }
+
+        if (historyApps.length === 0) {
+            historyContainer.innerHTML = emptyState("No appointment history available.");
+        } else {
+            historyApps.forEach(app => { historyContainer.innerHTML += createCard(app, false); });
+        }
+    }
+
+    function createCard(app, isPending) {
+        return `
+        <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm flex flex-col sm:flex-row gap-6 items-center sm:items-start transition-all hover:shadow-md">
+            <div class="w-20 h-20 rounded-full bg-cover bg-center shrink-0 border border-gray-100" style="background-image: url('${app.image}')"></div>
+            <div class="flex-1 text-center sm:text-left">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold">${app.doctorName}</h3>
+                    <span class="text-xs font-mono bg-gray-100 px-2 py-1 rounded text-gray-500">${app.bookingId}</span>
+                </div>
+                <p class="text-primary font-semibold text-sm mb-1">${app.specialty}</p>
+                <div class="flex items-center justify-center sm:justify-start gap-4 text-sm text-gray-500 mt-3">
+                    <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">calendar_month</span> ${app.date}</div>
+                    <div class="flex items-center gap-1"><span class="material-symbols-outlined text-sm">schedule</span> ${app.time}</div>
+                </div>
+            </div>
+            <div class="flex flex-col gap-2 w-full sm:w-auto">
+                ${isPending ? 
+                  `<button onclick="markComplete('${app.bookingId}')" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold text-sm hover:bg-green-700 transition-colors shadow-sm w-full flex items-center justify-center gap-2"><span class="material-symbols-outlined text-sm">check</span> Mark Done</button>
+                   <button onclick="cancelApp('${app.bookingId}')" class="text-red-500 px-6 py-2 text-xs font-bold hover:underline w-full">Cancel</button>` 
+                  : 
+                  `<button disabled class="bg-gray-100 text-gray-400 px-6 py-2 rounded-lg font-bold text-sm cursor-not-allowed w-full flex items-center justify-center gap-2"><span class="material-symbols-outlined text-sm">history</span> Completed</button>`
+                }
+            </div>
+        </div>`;
+    }
+
+    function emptyState(msg) {
+        return `<div class="text-center py-12 bg-white rounded-xl border border-dashed border-gray-300">
+            <span class="material-symbols-outlined text-4xl text-gray-300 mb-2">event_busy</span>
+            <p class="text-gray-500 font-medium">${msg}</p>
+        </div>`;
+    }
+
+    function markComplete(id) {
+        let apps = getAppointments();
+        const index = apps.findIndex(a => a.bookingId === id);
+        if (index > -1) {
+            apps[index].status = 'completed';
+            localStorage.setItem('healthSyncAppointments', JSON.stringify(apps));
+            renderAppointments();
+        }
+    }
+
+    function cancelApp(id) {
+        if(confirm("Are you sure you want to cancel this appointment?")) {
+            let apps = getAppointments();
+            apps = apps.filter(a => a.bookingId !== id);
+            localStorage.setItem('healthSyncAppointments', JSON.stringify(apps));
+            renderAppointments();
+        }
+    }
+
+    function clearAllData() {
+        if(confirm("This will delete all appointment history. Continue?")) {
+            localStorage.removeItem('healthSyncAppointments');
+            sessionStorage.clear();
+            renderAppointments();
+            alert("Data reset.");
+        }
+    }
+
+    function updateNavHighlight(tab) {
+        const historyLink = document.getElementById('nav-history');
+        const pendingLink = document.getElementById('nav-pending');
+        
+        // Reset both
+        historyLink.classList.remove('text-primary');
+        pendingLink.classList.remove('text-primary');
+        
+        // Highlight active
+        if (tab === 'history') {
+            historyLink.classList.add('text-primary');
+        } else {
+            pendingLink.classList.add('text-primary');
+        }
+    }
+
+    function switchTab(tab) {
+        const pendingSec = document.getElementById('pendingSection');
+        const historySec = document.getElementById('historySection');
+        const tabP = document.getElementById('tabPending');
+        const tabH = document.getElementById('tabHistory');
+
+        if (tab === 'pending') {
+            pendingSec.classList.remove('hidden');
+            historySec.classList.add('hidden');
+            tabP.className = "px-6 py-2 rounded-lg text-sm font-bold transition-all bg-primary text-white shadow-sm";
+            tabH.className = "px-6 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-primary";
+        } else {
+            pendingSec.classList.add('hidden');
+            historySec.classList.remove('hidden');
+            tabP.className = "px-6 py-2 rounded-lg text-sm font-bold transition-all text-gray-500 hover:text-primary";
+            tabH.className = "px-6 py-2 rounded-lg text-sm font-bold transition-all bg-primary text-white shadow-sm";
+        }
+        updateNavHighlight(tab);
+    }
+
+    function manualSwitch(tab) {
+        const url = new URL(window.location);
+        url.searchParams.set('tab', tab);
+        window.history.pushState({}, '', url);
+        switchTab(tab);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const tab = urlParams.get('tab') || 'pending';
+        switchTab(tab);
+        renderAppointments();
+    });
+</script>
+
+</body>
+</html>
